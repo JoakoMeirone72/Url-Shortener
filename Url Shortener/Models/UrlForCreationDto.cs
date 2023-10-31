@@ -13,6 +13,9 @@ namespace Url_Shortener.Models
         public string? ShortUrl { get; set; }
 
         [Required]
-        public int ContadorVisitas { get; set;}
+        public int ContadorVisitas { get; set; }
+
+        [Required]
+        public CategoriaEnum Categoria { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Url_Shortener.Data;
 using Url_Shortener.Entities;
 using Url_Shortener.Helpers;
@@ -6,9 +7,10 @@ using Url_Shortener.Models;
 
 namespace Url_Shortener.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route(template: "api/[controller]")]
-    public class UrlController : Controller
+    [Authorize]
+    public class UrlController : ControllerBase
     {
         private readonly UrlShortenerContext _UrlContext;
 
@@ -21,7 +23,7 @@ namespace Url_Shortener.Controllers
 
         public IActionResult GetUrl(string ClientUrl)
         {
-            var urlEntity = _UrlContext.UserUrl.FirstOrDefault(x => x.ShortUrl == ClientUrl);
+            var urlEntity = _UrlContext.Urls.FirstOrDefault(x => x.ShortUrl == ClientUrl);
 
             if (urlEntity == null)
             {
@@ -29,15 +31,14 @@ namespace Url_Shortener.Controllers
             }
             urlEntity.ContadorVisitas += 1;
             _UrlContext.SaveChanges();
-            return Ok(urlEntity.Url);
-            //return Redirect(urlEntity.Url);
+            return Redirect(urlEntity.Url.ToString());
         }
 
         [HttpGet("getByCategoria")]
 
         public IActionResult GetUrlsByCategory(CategoriaEnum Category)
         {
-            var urlsFounded = _UrlContext.UserUrl.Where(x => x.Categoria == Category).ToList();
+            var urlsFounded = _UrlContext.Urls.Where(x => x.Categoria == Category).ToList();
 
             var urlList = urlsFounded.Select(url => url.Url).ToList();
             return Ok(urlList);
@@ -48,14 +49,14 @@ namespace Url_Shortener.Controllers
         public IActionResult CreateNewURL(string newurl, CategoriaEnum category)
         {
             var urlHelper = new UrlHelper();
-            var urlEntity = new UrlForCreationDto()
+            var urlEntity = new URL()
             {
                 Url = newurl,
                 ShortUrl = urlHelper.GetShortURL(),
                 Categoria = category
             };
 
-            _UrlContext.UserUrl.Add(urlEntity);
+            _UrlContext.Urls.Add(urlEntity);
             _UrlContext.SaveChanges();
             return Ok(urlEntity.ShortUrl);
         }

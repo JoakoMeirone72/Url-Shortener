@@ -31,7 +31,8 @@ namespace Url_Shortener.Controllers
             }
             urlEntity.ContadorVisitas += 1;
             _UrlContext.SaveChanges();
-            return Redirect(urlEntity.Url.ToString());
+            return Ok(urlEntity.Url);
+            //return Redirect(urlEntity.Url);
         }
 
         [HttpGet("getByCategoria")]
